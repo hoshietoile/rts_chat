@@ -9,8 +9,8 @@ services:
     volumes:
       - ./frontend/app:/app
     tty: true
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
     command: yarn dev
 
   api:
