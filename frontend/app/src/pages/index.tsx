@@ -53,8 +53,8 @@ const LobbyPage = () => {
 
   return <div>
     Lobby
-    <div>
-      <input onChange={onChange} />
+    <div className='p-4'>
+      <input onChange={onChange} className='rounded px-4 py-2 text-gray-800 dark:text-gray-200 dark:bg-slate-600 border-none outline-0 focus:ring-2 focus:ring-[#B5D3B8]' />
       <button onClick={onClick}>Send</button>
     </div>
     <div>
