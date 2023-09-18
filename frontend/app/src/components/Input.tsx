@@ -4,9 +4,10 @@ type Props = {
   value: string;
   className?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
-const Input = ({ value, className, onChange }: Props) => {
+const Input = ({ value, className, onChange, onKeyDown }: Props) => {
   const inputClass = useMemo<string>(() => {
     const baseClass = `rounded
         px-4
@@ -25,7 +26,14 @@ const Input = ({ value, className, onChange }: Props) => {
     return [className || '', baseClass].join(' ');
   }, [className]);
 
-  return <input onChange={onChange} value={value} className={inputClass} />;
+  return (
+    <input
+      onChange={onChange}
+      onKeyDown={onKeyDown}
+      value={value}
+      className={inputClass}
+    />
+  );
 };
 
 export default Input;

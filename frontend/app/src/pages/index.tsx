@@ -1,8 +1,9 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { RoomContext } from '../components/providers/Room.provider';
 import { ChevronLeftIcon } from '@heroicons/react/20/solid';
+import { HEADER_HEIGHT } from '../constant';
 import RoomList from '../components/RoomList';
-import Chat from '../components/Chat';
+import ChatList from '../components/ChatList';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
@@ -33,7 +34,7 @@ const LobbyPage = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh_-_48px)]">
+    <div className={`flex h-[calc(100vh_-_${HEADER_HEIGHT}px)]`}>
       {!user ? (
         <div className="flex w-full">
           <RoomList rooms={rooms} onClickRow={onChangeRoom} />
@@ -44,7 +45,7 @@ const LobbyPage = () => {
               </button>
               <span>{room?.name || 'Lobby'}</span>
             </div>
-            <Chat onSend={createSingleChat} chats={chats} />
+            <ChatList onSend={createSingleChat} chats={chats} />
           </main>
         </div>
       ) : (

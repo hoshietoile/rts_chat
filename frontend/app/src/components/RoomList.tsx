@@ -1,4 +1,5 @@
 import { Room } from '../api/rest/rooms';
+import { NAV_WIDTH } from '../constant';
 import Dropdown from './Dropdown';
 
 type Props = {
@@ -9,8 +10,7 @@ type Props = {
 const RoomList = ({ rooms, onClickRow }: Props) => {
   return (
     <div
-      className="overflow-y-scroll hidden-scrollbar border-r"
-      style={{ width: '250px' }}
+      className={`overflow-y-scroll hidden-scrollbar border-r w-[${NAV_WIDTH}px]`}
     >
       <div>
         <ul>
@@ -18,7 +18,7 @@ const RoomList = ({ rooms, onClickRow }: Props) => {
             return (
               <li
                 key={room.id}
-                className="border-b border-1 px-4 py-2 hover:bg-slate-200 cursor-pointer"
+                className="border-b border-1 px-4 py-2 hover:bg-slate-200 dark:hover:bg-teal-900 cursor-pointer"
               >
                 <div onClick={() => onClickRow(room.id)}>
                   <div className="flex">
