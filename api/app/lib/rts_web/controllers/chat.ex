@@ -7,19 +7,23 @@ defmodule RtsWeb.Chat do
     conn
   end
 
-  def add(%{"content" => content, "created_at" => created_at}) do
+  def add(%{"created_at" => created_at, "content" => _content, "room_id" => _room_id} = payload) do
     conn = conn()
-    {:ok, res} = Redix.command(conn, ["ZADD", @key, created_at, content])
+    {:ok, result} = Jason.encode(payload)
+    {:ok, res} = Redix.command(conn, ["XADD", @key, "*", "data", result])
   end
 
-  def list() do
+  def list(payload \\ %{"room_id" => nil}) do
     conn = conn()
-    {:ok, res} = Redix.command(conn, ["ZRANGE", @key, 0, -1, "WITHSCORES"])
+    {:ok, res} = Redix.command(conn, ["XRANGE", @key, "-", "+"])
+    {:ok, room_id} = Map.fetch(payload, "room_id")
+
 
     res
-    |> Enum.chunk_every(2)
-    |> Enum.with_index(1)
-    |> Enum.map(fn {[content, created_at], index}
-      -> %{content: content, created_at: created_at, index: index} end)
+    |> Enum.map(fn [id, [_key, data]] ->
+      {:ok, result} = Jason.decode(data)
+      result |> Map.put("id", id)
+    end)
+    |> Enum.filter(fn %{"room_id" => rid} -> room_id == rid end)
   end
 end
