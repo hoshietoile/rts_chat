@@ -13,8 +13,6 @@ import { RoomContext } from './providers/Room.provider';
 
 type Props = {
   chats: ChatPayload[];
-  onKeystrokeContinue: () => void;
-  onKeystrokeEnd: () => void;
   onSend: (payload: string) => void;
 };
 

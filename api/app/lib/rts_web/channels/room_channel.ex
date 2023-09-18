@@ -16,8 +16,8 @@ defmodule RtsWeb.RoomChannel do
   end
 
   @impl true
-  def join("room:" <> room_id, payload, socket) do
-    IO.inspect payload
+  def join("room:" <> room_id, %{"user_id" => user_id, "user_name" => user_name} = payload, socket) do
+    UserStore.join_room(%{room_id: room_id, user_id: user_id, user_name: user_name})
     if authorized?(payload) do
       {:ok, socket}
     else
@@ -25,10 +25,23 @@ defmodule RtsWeb.RoomChannel do
     end
   end
 
-  # def handle_in("rooms_users", payload, socket) do
-    # TODO: get user-list which belongs to the room
-    # {room_id: user_id[]}
-  # end
+  def handle_in("join_room", %{"room_id" => room_id}, socket) do
+    if room_id != nil do
+      room_member_list = UserStore.get_room_member_list(room_id)
+      broadcast!(socket, "on_user_join", %{list: room_member_list})
+    end
+    {:noreply, socket}
+  end
+
+  def handle_in("on_leave_room", %{"room_id" => room_id} = payload, socket) do
+    if room_id != nil do
+      list = UserStore.delete_room_member(payload)
+      IO.inspect "Leave result"
+      IO.inspect list
+      broadcast!(socket, "on_user_join", %{list: list})
+    end
+    {:noreply, socket}
+  end
 
   def handle_in("list", payload, socket) do
     list = Chat.list(payload)

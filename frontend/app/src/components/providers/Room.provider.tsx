@@ -12,7 +12,7 @@ import RoomChannel, { ChatPayload } from '../../api/channels/roomChannel';
 import { Room, RoomListResponse, getRoomList } from '../../api/rest/rooms';
 import { useCookies } from 'react-cookie';
 
-type User = {
+export type User = {
   userId: string;
   userName: string;
 };
@@ -27,6 +27,7 @@ type RoomContext = {
   rooms: Room[];
   chats: ChatPayload[];
   inputingUser: User[];
+  roomMember: User[];
   createSingleChat: (content: string) => void;
   createSingleRoom: (name: string) => void;
   createDisplayUser: (userName: string) => void;
@@ -50,6 +51,7 @@ const RoomProvider = ({ children }: Props) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [chats, setChats] = useState([]);
   const [inputingUser, setInputingUser] = useState<User[]>([]);
+  const [roomMember, setRoomMember] = useState<User[]>([]);
 
   const user = useMemo<User | null>(() => {
     return cookies[USER_COOKIE_KEY] || null;
@@ -57,13 +59,25 @@ const RoomProvider = ({ children }: Props) => {
 
   const onChangeRoom = (roomId: string | null) => {
     if (roomChannelRef.current) {
+      roomChannelRef.current.broadCastLeaveRoom(
+        user?.userId as string,
+        user?.userName as string
+      );
       roomChannelRef.current.disconnect?.();
+      setRoomMember([]);
     }
 
     const nextRoom = rooms.find((room: Room) => room.id === roomId) || null;
     setCurrentRoom(nextRoom);
-    roomChannelRef.current = new RoomChannel(roomId, user?.userId);
-    roomChannelRef.current.join(() => {});
+    roomChannelRef.current = new RoomChannel(roomId, user || undefined);
+    roomChannelRef.current.join(() => {
+      roomChannelRef?.current?.getRoomMemberList(
+        roomId as string,
+        (response) => {
+          console.log('### res', response);
+        }
+      );
+    });
 
     roomChannelRef.current.getChatList((response) => {
       setChats(response.list);
@@ -102,6 +116,19 @@ const RoomProvider = ({ children }: Props) => {
       setInputingUser((prev: User[]) => {
         return prev.filter((user: User) => user.userId !== payload.user_id);
       });
+    });
+
+    roomChannelRef.current.on('on_user_join', (payload) => {
+      const responseList = payload.list;
+      const list = responseList.flatMap((u) => {
+        return u.user_id === user?.userId
+          ? []
+          : {
+              userId: u.user_id,
+              userName: u.user_name,
+            };
+      });
+      setRoomMember(list);
     });
   };
 
@@ -159,6 +186,7 @@ const RoomProvider = ({ children }: Props) => {
         rooms,
         chats,
         inputingUser,
+        roomMember,
         createSingleChat,
         createSingleRoom,
         createDisplayUser,

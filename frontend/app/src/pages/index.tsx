@@ -12,6 +12,7 @@ const LobbyPage = () => {
     room,
     rooms,
     chats,
+    roomMember,
     onChangeRoom,
     createDisplayUser,
     createSingleChat,
@@ -42,6 +43,8 @@ const LobbyPage = () => {
                 <ChevronLeftIcon className="w-6 h-6" />
               </button>
               <span>{room?.name || 'Lobby'}</span>
+              <span className="flex-1" />
+              <span>{roomMember.map((m) => m.userName).join(',')}</span>
             </div>
             <ChatList onSend={createSingleChat} chats={chats} />
           </main>
