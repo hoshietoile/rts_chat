@@ -1,6 +1,7 @@
 defmodule RtsWeb.RoomChannel do
   use RtsWeb, :channel
   alias RtsWeb.Chat
+  alias RtsWeb.UserStore
   alias RtsWeb.RoomJSON
   alias Rts.Rooms
   alias Rts.Rooms.Room
@@ -36,16 +37,10 @@ defmodule RtsWeb.RoomChannel do
     {:noreply, socket}
   end
 
-  # def handle_in("new_user", payload, socket) do
-  #   IO.puts "New user"
-  #   IO.inspect payload
-  #   Chat.add(payload)
-  #   list = Chat.list(payload)
-  #   IO.puts "New list msg"
-  #   IO.inspect list
-  #   broadcast!(socket, "new_msg", %{list: list})
-  #   {:noreply, socket}
-  # end
+  def handle_in("new_user", payload, socket) do
+    id = UserStore.add(payload)
+    {:reply, {:ok, %{id: id}}, socket}
+  end
 
   def handle_in("new_room", payload, socket) do
     with {:ok, %Room{} = raw_room} <- Rooms.create_room(payload) do

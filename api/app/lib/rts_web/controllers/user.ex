@@ -10,6 +10,7 @@ defmodule RtsWeb.UserStore do
     conn = conn()
     {:ok, result} = Jason.encode(payload)
     {:ok, res} = Redix.command(conn, ["XADD", @key, "*", "data", result])
+    res
   end
 
   def find(%{"id" => user_id} = payload) do

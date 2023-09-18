@@ -7,7 +7,7 @@ defmodule RtsWeb.Chat do
     conn
   end
 
-  def add(%{"created_at" => created_at, "content" => _content, "room_id" => _room_id} = payload) do
+  def add(payload) do
     conn = conn()
     {:ok, result} = Jason.encode(payload)
     {:ok, res} = Redix.command(conn, ["XADD", @key, "*", "data", result])
@@ -17,7 +17,6 @@ defmodule RtsWeb.Chat do
     conn = conn()
     {:ok, res} = Redix.command(conn, ["XRANGE", @key, "-", "+"])
     {:ok, room_id} = Map.fetch(payload, "room_id")
-
 
     res
     |> Enum.map(fn [id, [_key, data]] ->
