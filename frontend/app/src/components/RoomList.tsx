@@ -1,6 +1,6 @@
+// import { EllipsisHorizontalIcon } from '@heroicons/react/20/solid';
 import { Room } from '../api/rest/rooms';
-import { NAV_WIDTH } from '../constant';
-import Dropdown from './Dropdown';
+// import Dropdown from './Dropdown';
 
 type Props = {
   rooms: Room[];
@@ -9,9 +9,7 @@ type Props = {
 
 const RoomList = ({ rooms, onClickRow }: Props) => {
   return (
-    <div
-      className={`overflow-y-scroll hidden-scrollbar border-r w-[${NAV_WIDTH}px]`}
-    >
+    <div className={`overflow-y-scroll hidden-scrollbar border-r w-[250px]`}>
       <div>
         <ul>
           {rooms.map((room) => {
@@ -23,9 +21,11 @@ const RoomList = ({ rooms, onClickRow }: Props) => {
                 <div onClick={() => onClickRow(room.id)}>
                   <div className="flex">
                     <span className="font-bold flex-1">{room.name}</span>
-                    <span>
-                      <Dropdown />
-                    </span>
+                    {/* <span>
+                      <Dropdown>
+                        <EllipsisHorizontalIcon className="w-5 h-5 hover:bg-teal-300 hover:text-white rounded" />
+                      </Dropdown>
+                    </span> */}
                   </div>
 
                   <ul className="flex space-x-2 truncate text-ellipsis">

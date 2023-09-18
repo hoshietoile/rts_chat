@@ -1,7 +1,15 @@
-import { EllipsisHorizontalIcon } from '@heroicons/react/20/solid';
-import React, { useMemo, useState } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 
-const Dropdown = () => {
+export type Align = 'left' | 'right';
+
+type Props = {
+  userName?: string;
+  children: ReactNode;
+  align: Align;
+  onClickForget: () => void;
+};
+
+const Dropdown = ({ userName, children, align, onClickForget }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onOpen = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -15,17 +23,16 @@ const Dropdown = () => {
   };
 
   const dropdownClass = useMemo(() => {
-    return (
-      (isOpen ? '' : 'hidden') +
-      ' absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700'
-    );
-  }, [isOpen]);
+    return [
+      isOpen ? '' : 'hidden',
+      align === 'right' ? 'right-0' : '',
+      'absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 text-left',
+    ].join(' ');
+  }, [isOpen, align]);
 
   return (
-    <>
-      <button onClick={isOpen ? onClose : onOpen} className="relative">
-        <EllipsisHorizontalIcon className="w-5 h-5 hover:bg-teal-300 hover:text-white rounded" />
-      </button>
+    <div className="relative">
+      <button onClick={isOpen ? onClose : onOpen}>{children}</button>
       <div className={dropdownClass}>
         <ul
           className="py-2 text-sm text-gray-700 dark:text-gray-200 w-100"
@@ -33,17 +40,20 @@ const Dropdown = () => {
         >
           <li>
             <span className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-              Update
+              {userName}
             </span>
           </li>
           <li>
-            <span className="text-red-400 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-              Delete
-            </span>
+            <button
+              onClick={onClickForget}
+              className="text-left w-full text-red-400 block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+            >
+              Forget UserName
+            </button>
           </li>
         </ul>
       </div>
-    </>
+    </div>
   );
 };
 

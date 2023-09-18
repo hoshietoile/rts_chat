@@ -10,9 +10,18 @@ export type RoomMessagePayload = {
   message: string;
 };
 
-export type ChatPayload = {
-  created_at: string;
+export type ClientChatPayload = {
   content: string;
+  userId: string;
+  userName: string;
+};
+
+export type ChatPayload = {
+  content: string;
+  room_id: string | null;
+  user_id: string;
+  user_name: string;
+  created_at: string;
 };
 
 export type ChatListPayload = {
@@ -57,20 +66,24 @@ class RoomChannel {
       .receive('ok', callback);
   }
 
-  createDisplayUser(userName: string) {
-    return this.channel.push('new_user', { name: userName });
+  createDisplayUser(userName: string, callback: AnyFunction) {
+    return this.channel
+      .push('new_user', { name: userName })
+      .receive('ok', callback);
   }
 
   broadCastNewRoom(name: string) {
     return this.channel.push('new_room', { name });
   }
 
-  broadCastNewMessage(message: string) {
+  broadCastNewMessage({ content, userId, userName }: ClientChatPayload) {
     const roomId = this.roomId || null;
     this.channel.push('new_msg', {
-      content: message,
-      created_at: Date.now(),
+      content: content,
       room_id: roomId,
+      user_id: userId,
+      user_name: userName,
+      created_at: Date.now(),
     });
   }
 }

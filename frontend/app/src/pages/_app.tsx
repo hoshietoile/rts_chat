@@ -5,12 +5,14 @@ import { RoomContext } from '../components/providers/Room.provider';
 import Toggle from '../components/Toggle';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import { UserIcon } from '@heroicons/react/20/solid';
+import Dropdown from '../components/Dropdown';
 
 const DARK_COOKIE_KEY = 'isDark';
 const DARK_CLASS_NAME = 'dark';
 
 const App = () => {
-  const { createSingleRoom } = useContext(RoomContext);
+  const { user, createSingleRoom, forgetUserName } = useContext(RoomContext);
 
   const [isDark, setIsDark] = useState(false);
   const [cookies, setCookie] = useCookies([DARK_COOKIE_KEY]);
@@ -26,6 +28,19 @@ const App = () => {
     createSingleRoom(nameInput);
     setNameInput('');
   }, [nameInput, createSingleRoom]);
+
+  const onClickButton = useCallback(() => {
+    onCreateRoom();
+  }, [onCreateRoom]);
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        onCreateRoom();
+      }
+    },
+    [onCreateRoom]
+  );
 
   const onToggleTheme = (e: React.ChangeEvent<HTMLInputElement>) => {
     const html: HTMLElement = document.querySelector('html')!;
@@ -53,10 +68,29 @@ const App = () => {
       <header className="p-2 flex border-b border-1 bg-slate-300 dark:bg-teal-950">
         <div className="font-bold">Rts Chat</div>
         <div className="flex-1 px-2 space-x-2">
-          <Input onChange={onChangeNameInput} value={nameInput} />
-          <Button onClick={onCreateRoom}>CreateRoom</Button>
+          {user && (
+            <>
+              <Input
+                onKeyDown={onKeyDown}
+                onChange={onChangeNameInput}
+                value={nameInput}
+              />
+              <Button onClick={onClickButton}>CreateRoom</Button>
+            </>
+          )}
         </div>
-        <div>
+        <div className="flex">
+          {user && (
+            <div className="m-auto">
+              <Dropdown
+                align="right"
+                userName={user?.userName}
+                onClickForget={forgetUserName}
+              >
+                <UserIcon className=" w-8 h-8 m-auto rounded-full border mr-2" />
+              </Dropdown>
+            </div>
+          )}
           <Toggle defaultChecked={!isDark} onChange={onToggleTheme} />
         </div>
       </header>

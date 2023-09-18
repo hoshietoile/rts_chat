@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useState } from 'react';
 import { RoomContext } from '../components/providers/Room.provider';
 import { ChevronLeftIcon } from '@heroicons/react/20/solid';
-import { HEADER_HEIGHT } from '../constant';
 import RoomList from '../components/RoomList';
 import ChatList from '../components/ChatList';
 import Input from '../components/Input';
@@ -9,6 +8,7 @@ import Button from '../components/Button';
 
 const LobbyPage = () => {
   const {
+    user,
     room,
     rooms,
     chats,
@@ -16,8 +16,6 @@ const LobbyPage = () => {
     createDisplayUser,
     createSingleChat,
   } = useContext(RoomContext);
-
-  const user = null;
 
   const [userName, setUserName] = useState('');
   const onChangeUserName = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,8 +32,8 @@ const LobbyPage = () => {
   };
 
   return (
-    <div className={`flex h-[calc(100vh_-_${HEADER_HEIGHT}px)]`}>
-      {!user ? (
+    <div className={`flex h-[calc(100vh_-_48px)]`}>
+      {user ? (
         <div className="flex w-full">
           <RoomList rooms={rooms} onClickRow={onChangeRoom} />
           <main className="flex-1">
@@ -49,8 +47,8 @@ const LobbyPage = () => {
           </main>
         </div>
       ) : (
-        <div className="flex">
-          <div className="border border-1 rounded m-auto px-10 py-6 ">
+        <div className="flex justify-center w-full">
+          <div className="border border-1 rounded m-auto px-6 py-4 ">
             <div className="space-y-2 flex flex-col">
               <p>Display Name</p>
               <Input value={userName} onChange={onChangeUserName} />

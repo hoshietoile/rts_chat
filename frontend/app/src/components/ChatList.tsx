@@ -2,15 +2,10 @@ import React, { type RefObject, useCallback, useRef, useState } from 'react';
 import Button from './Button';
 import Input from './Input';
 import ChatPanel from './ChatPanel';
-import { NAV_WIDTH } from '../constant';
-
-type Chat = {
-  content: string;
-  created_at: string;
-};
+import type { ChatPayload } from '../api/channels/roomChannel';
 
 type Props = {
-  chats: Chat[];
+  chats: ChatPayload[];
   onSend: (payload: string) => void;
 };
 
@@ -41,17 +36,13 @@ const ChatList = ({ chats, onSend }: Props) => {
     [send]
   );
 
-  // useLayoutEffect(() => {
-  //   chatRef.current?.scrollIntoView();
-  // }, []);
-
   return (
     <ul className="flex-row-reverse max-h-full overflow-y-scroll hidden-scrollbar">
-      {chats.map((chat: Chat) => {
+      {chats.map((chat: ChatPayload) => {
         return (
           <ChatPanel
             key={chat.created_at}
-            userName={'User Name'}
+            userName={chat.user_name}
             email={'email@example.com'}
             content={chat.content}
             createdAt={chat.created_at}
@@ -59,7 +50,7 @@ const ChatList = ({ chats, onSend }: Props) => {
         );
       })}
       <li
-        className={`p-2 fixed bottom-0 right-0 left-[${NAV_WIDTH}px] border-t bg-slate-100 dark:bg-teal-950`}
+        className={`p-2 fixed bottom-0 right-0 left-[250px] border-t bg-slate-100 dark:bg-teal-950`}
       >
         <div className="flex space-x-2">
           <Input
