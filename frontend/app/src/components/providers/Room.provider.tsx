@@ -2,6 +2,7 @@ import {
   MutableRefObject,
   ReactNode,
   createContext,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -25,11 +26,14 @@ type RoomContext = {
   room: Room | null;
   rooms: Room[];
   chats: ChatPayload[];
+  inputingUser: User[];
   createSingleChat: (content: string) => void;
   createSingleRoom: (name: string) => void;
   createDisplayUser: (userName: string) => void;
   forgetUserName: () => void;
   onChangeRoom: (roomId: string | null) => void;
+  onKeystrokeContinue: () => void;
+  onKeystrokeEnd: () => void;
 };
 
 export const RoomContext = createContext<RoomContext>({} as RoomContext);
@@ -45,6 +49,7 @@ const RoomProvider = ({ children }: Props) => {
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [chats, setChats] = useState([]);
+  const [inputingUser, setInputingUser] = useState<User[]>([]);
 
   const user = useMemo<User | null>(() => {
     return cookies[USER_COOKIE_KEY] || null;
@@ -57,7 +62,7 @@ const RoomProvider = ({ children }: Props) => {
 
     const nextRoom = rooms.find((room: Room) => room.id === roomId) || null;
     setCurrentRoom(nextRoom);
-    roomChannelRef.current = new RoomChannel(roomId);
+    roomChannelRef.current = new RoomChannel(roomId, user?.userId);
     roomChannelRef.current.join(() => {});
 
     roomChannelRef.current.getChatList((response) => {
@@ -71,6 +76,31 @@ const RoomProvider = ({ children }: Props) => {
     roomChannelRef.current.on('on_new_room', (payload) => {
       setRooms((prev: Room[]) => {
         return [...prev, payload.data];
+      });
+    });
+
+    roomChannelRef.current.on('on_user_inputing', (payload) => {
+      setInputingUser((prev: User[]) => {
+        const isMyself = payload.user_id === user?.userId;
+        const isExists = prev.find(
+          (user: User) => user.userId === payload.user_id
+        );
+        if (isExists || isMyself) {
+          return prev;
+        }
+        return [
+          ...prev,
+          {
+            userId: payload.user_id,
+            userName: payload.user_name,
+          },
+        ];
+      });
+    });
+
+    roomChannelRef.current.on('on_user_inputend', (payload) => {
+      setInputingUser((prev: User[]) => {
+        return prev.filter((user: User) => user.userId !== payload.user_id);
       });
     });
   };
@@ -95,6 +125,19 @@ const RoomProvider = ({ children }: Props) => {
     });
   };
 
+  const onKeystrokeContinue = useCallback(() => {
+    const { userId, userName } = user || {};
+    roomChannelRef.current?.broadCastUserInputContinue(
+      userId as string,
+      userName as string
+    );
+  }, [user]);
+
+  const onKeystrokeEnd = useCallback(() => {
+    const { userId } = user || {};
+    roomChannelRef.current?.broadCastUserInputEnd(userId as string);
+  }, [user]);
+
   const forgetUserName = () => {
     removeCookie(USER_COOKIE_KEY);
   };
@@ -115,11 +158,14 @@ const RoomProvider = ({ children }: Props) => {
         room: currentRoom,
         rooms,
         chats,
+        inputingUser,
         createSingleChat,
         createSingleRoom,
         createDisplayUser,
         forgetUserName,
         onChangeRoom,
+        onKeystrokeContinue,
+        onKeystrokeEnd,
       }}
     >
       {children}

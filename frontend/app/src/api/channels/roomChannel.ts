@@ -3,7 +3,11 @@ import type { AnyFunction } from '../../@types';
 
 const SOCKET_ENDPOINT = 'ws://localhost:4000/socket';
 
-export type RoomTopic = 'on_new_room' | 'new_msg';
+export type RoomTopic =
+  | 'on_new_room'
+  | 'new_msg'
+  | 'on_user_inputing'
+  | 'on_user_inputend';
 
 export type RoomMessagePayload = {
   user_id: string;
@@ -37,7 +41,9 @@ class RoomChannel {
     const socket = new Socket(SOCKET_ENDPOINT, {});
 
     socket.connect();
-    this.channel = socket.channel(roomId ? `room:${roomId}` : 'room:lobby', {});
+    this.channel = socket.channel(roomId ? `room:${roomId}` : 'room:lobby', {
+      user_id: userId,
+    });
     this.roomId = roomId;
     this.userId = userId;
   }
@@ -85,6 +91,17 @@ class RoomChannel {
       user_name: userName,
       created_at: Date.now(),
     });
+  }
+
+  broadCastUserInputContinue(userId: string, userName: string) {
+    this.channel.push('on_user_inputing', {
+      user_id: userId,
+      user_name: userName,
+    });
+  }
+
+  broadCastUserInputEnd(userId: string) {
+    this.channel.push('on_user_inputend', { user_id: userId });
   }
 }
 
